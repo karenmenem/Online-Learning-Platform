@@ -7,6 +7,7 @@ import ManageLessons from './components/ManageLessons';
 import ManageQuizzes from './components/ManageQuizzes';
 import ManageQuestions from './components/ManageQuestions';
 import CourseLearning from './components/CourseLearning';
+import TakeQuiz from './components/TakeQuiz';
 
 function App() {
   const isAuthenticated = () => {
@@ -93,6 +94,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CourseLearning />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/courses/:courseId/quizzes/:quizId/take" 
+          element={
+            <ProtectedRoute>
+              <TakeQuiz />
             </ProtectedRoute>
           } 
         />

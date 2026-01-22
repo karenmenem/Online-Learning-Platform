@@ -62,6 +62,7 @@ function ManageQuizzes() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const token = localStorage.getItem('auth_token');
     
     try {
@@ -70,6 +71,8 @@ function ManageQuizzes() {
         : `http://localhost:8000/api/instructor/courses/${courseId}/quizzes`;
       
       const method = editingQuiz ? 'PUT' : 'POST';
+      
+      console.log('Submitting quiz:', formData);
       
       const response = await fetch(url, {
         method,
@@ -80,13 +83,23 @@ function ManageQuizzes() {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+      console.log('Response:', data);
+
       if (response.ok) {
+        alert('Quiz created successfully!');
         setShowModal(false);
         resetForm();
         loadQuizzes();
+      } else {
+        alert('Failed to create quiz: ' + (data.message || 'Unknown error'));
+        console.error('Error response:', data);
       }
     } catch (err) {
       console.error('Failed to save quiz:', err);
+      alert('Error: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 

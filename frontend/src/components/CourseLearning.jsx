@@ -7,6 +7,7 @@ function CourseLearning() {
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
   const [lessons, setLessons] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
   const [currentLesson, setCurrentLesson] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -14,6 +15,7 @@ function CourseLearning() {
   useEffect(() => {
     loadCourse();
     loadLessons();
+    loadQuizzes();
   }, [courseId]);
 
   useEffect(() => {
@@ -56,6 +58,22 @@ function CourseLearning() {
       setError('Failed to load lessons');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadQuizzes = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`http://localhost:8000/api/courses/${courseId}/quizzes`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      setQuizzes(data.quizzes || []);
+    } catch (err) {
+      console.error('Failed to load quizzes:', err);
     }
   };
 
@@ -176,27 +194,74 @@ function CourseLearning() {
           <h2>Course Content</h2>
           {loading ? (
             <p>Loading lessons...</p>
-          ) : lessons.length === 0 ? (
-            <p className="no-lessons">No lessons available yet.</p>
+          ) : lessons.length === 0 && quizzes.length === 0 ? (
+            <p className="no-lessons">No content available yet.</p>
           ) : (
-            <div className="lessons-list">
-              {lessons.map((lesson, index) => (
-                <div
-                  key={lesson.id}
-                  className={`lesson-item ${currentLesson?.id === lesson.id ? 'active' : ''} ${lesson.is_completed ? 'completed' : ''}`}
-                  onClick={() => setCurrentLesson(lesson)}
-                >
-                  <div className="lesson-number">{index + 1}</div>
-                  <div className="lesson-details">
-                    <div className="lesson-title">{lesson.title}</div>
-                    {lesson.estimated_duration && (
-                      <div className="lesson-duration">{lesson.estimated_duration} min</div>
-                    )}
+            <>
+              {/* Lessons Section */}
+              {lessons.length > 0 && (
+                <div className="content-section">
+                  <h3 className="section-title">📚 Lessons</h3>
+                  <div className="lessons-list">
+                    {lessons.map((lesson, index) => (
+                      <div
+                        key={lesson.id}
+                        className={`lesson-item ${currentLesson?.id === lesson.id ? 'active' : ''} ${lesson.is_completed ? 'completed' : ''}`}
+                        onClick={() => setCurrentLesson(lesson)}
+                      >
+                        <div className="lesson-number">{index + 1}</div>
+                        <div className="lesson-details">
+                          <div className="lesson-title">{lesson.title}</div>
+                          {lesson.estimated_duration && (
+                            <div className="lesson-duration">{lesson.estimated_duration} min</div>
+                          )}
+                        </div>
+                        {lesson.is_completed && <div className="check-mark">✓</div>}
+                      </div>
+                    ))}
                   </div>
-                  {lesson.is_completed && <div className="check-mark">✓</div>}
                 </div>
-              ))}
-            </div>
+              )}
+
+              {/* Quizzes Section */}
+              {quizzes.length > 0 && (
+                <div className="content-section">
+                  <h3 className="section-title">📝 Quizzes</h3>
+                  <div className="quizzes-list">
+                    {quizzes.map((quiz) => {
+                      const bestAttempt = quiz.attempts && quiz.attempts.length > 0 
+                        ? quiz.attempts.reduce((best, current) => 
+                            current.score > (best?.score || 0) ? current : best
+                          , null)
+                        : null;
+                      
+                      return (
+                        <div
+                          key={quiz.id}
+                          className="quiz-item"
+                          onClick={() => navigate(`/courses/${courseId}/quizzes/${quiz.id}/take`)}
+                        >
+                          <div className="quiz-icon">📝</div>
+                          <div className="quiz-details">
+                            <div className="quiz-title">{quiz.title}</div>
+                            <div className="quiz-meta">
+                              {quiz.questions_count} questions
+                              {quiz.time_limit && ` • ${quiz.time_limit} min`}
+                            </div>
+                            {bestAttempt && (
+                              <div className={`quiz-score ${bestAttempt.passed ? 'passed' : 'failed'}`}>
+                                Best: {Math.round(bestAttempt.score)}%
+                              </div>
+                            )}
+                          </div>
+                          <div className="quiz-arrow">→</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </aside>
 

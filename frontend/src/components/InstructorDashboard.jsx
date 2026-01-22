@@ -8,6 +8,7 @@ function InstructorDashboard() {
   const [courses, setCourses] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
+  const [showStatsTooltip, setShowStatsTooltip] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -254,24 +255,40 @@ function InstructorDashboard() {
                       </div>
                     </div>
                     <div className="course-info">
-                      <h3>{course.title}</h3>
-                      <p className="course-category">{course.category}</p>
-                      <p className="course-description">{course.short_description}</p>
-                      
-                      <div className="course-stats">
-                        <div className="stat">
-                          <span className="stat-number">{course.enrollments_count || 0}</span>
-                          <span className="stat-label">Students</span>
+                      <div className="course-header-row">
+                        <div>
+                          <h3>{course.title}</h3>
+                          <p className="course-category">{course.category}</p>
                         </div>
-                        <div className="stat">
-                          <span className="stat-number">{course.lessons_count || 0}</span>
-                          <span className="stat-label">Lessons</span>
-                        </div>
-                        <div className="stat">
-                          <span className="stat-number">{course.quizzes_count || 0}</span>
-                          <span className="stat-label">Quizzes</span>
+                        <div className="info-icon-wrapper">
+                          <button 
+                            className="info-icon-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowStatsTooltip(showStatsTooltip === course.id ? null : course.id);
+                            }}
+                          >
+                            ℹ️
+                          </button>
+                          {showStatsTooltip === course.id && (
+                            <div className="stats-tooltip">
+                              <div className="tooltip-item">
+                                <span className="tooltip-label">👥 Students:</span>
+                                <span className="tooltip-value">{course.enrollments_count || 0}</span>
+                              </div>
+                              <div className="tooltip-item">
+                                <span className="tooltip-label">📚 Lessons:</span>
+                                <span className="tooltip-value">{course.lessons_count || 0}</span>
+                              </div>
+                              <div className="tooltip-item">
+                                <span className="tooltip-label">📝 Quizzes:</span>
+                                <span className="tooltip-value">{course.quizzes_count || 0}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
+                      <p className="course-description">{course.short_description}</p>
 
                       <div className="course-actions">
                         <button 

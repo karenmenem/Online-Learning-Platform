@@ -60,7 +60,7 @@ class QuizController extends Controller
 
         // Verify course belongs to instructor
         $course = Course::where('id', $courseId)
-            ->where('instructor_id', Auth::id())
+            ->where('created_by', Auth::id())
             ->firstOrFail();
 
         $quiz = Quiz::create([
@@ -94,7 +94,7 @@ class QuizController extends Controller
 
         // Verify course belongs to instructor
         $course = Course::where('id', $courseId)
-            ->where('instructor_id', Auth::id())
+            ->where('created_by', Auth::id())
             ->firstOrFail();
 
         $quiz = Quiz::where('course_id', $courseId)
@@ -110,7 +110,7 @@ class QuizController extends Controller
     {
         // Verify course belongs to instructor
         $course = Course::where('id', $courseId)
-            ->where('instructor_id', Auth::id())
+            ->where('created_by', Auth::id())
             ->firstOrFail();
 
         $quiz = Quiz::where('course_id', $courseId)
@@ -217,7 +217,7 @@ class QuizController extends Controller
     {
         // Verify course belongs to instructor
         $course = Course::where('id', $courseId)
-            ->where('instructor_id', Auth::id())
+            ->where('created_by', Auth::id())
             ->firstOrFail();
 
         $quiz = Quiz::findOrFail($quizId);

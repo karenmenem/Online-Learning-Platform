@@ -258,6 +258,70 @@
   line-height: 1.3;
 }
 
+.course-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.info-icon-wrapper {
+  position: relative;
+}
+
+.info-icon-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.6;
+  transition: all 0.2s;
+  border-radius: 50%;
+}
+
+.info-icon-btn:hover {
+  opacity: 1;
+  background-color: #f0f0f0;
+}
+
+.stats-tooltip {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 160px;
+  box-shadow: 4px 4px 0 #000000;
+  z-index: 10;
+}
+
+.tooltip-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tooltip-item:last-child {
+  border-bottom: none;
+}
+
+.tooltip-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+}
+
+.tooltip-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+}
+
 .course-category {
   display: inline-block;
   padding: 4px 12px;
@@ -275,36 +339,10 @@
   color: #666;
   line-height: 1.6;
   margin-bottom: 16px;
-  min-height: 60px;
+  min-height: 40px;
 }
 
-.course-stats {
-  display: flex;
-  justify-content: space-around;
-  padding: 16px 0;
-  margin-bottom: 16px;
-  border-top: 2px solid #f0f0f0;
-  border-bottom: 2px solid #f0f0f0;
-}
-
-.course-stats .stat {
-  text-align: center;
-}
-
-.course-stats .stat-number {
-  display: block;
-  font-size: 24px;
-  font-weight: 800;
-  color: #000000;
-}
-
-.course-stats .stat-label {
-  display: block;
-  font-size: 12px;
-  color: #666;
-  text-transform: uppercase;
-  font-weight: 600;
-}
+/* Removed old course-stats - now using tooltip */
 
 .course-actions {
   display: grid;

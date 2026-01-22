@@ -43,7 +43,7 @@ class QuestionController extends Controller
             ->firstOrFail();
         
         $course = Course::where('id', $courseId)
-            ->where('instructor_id', Auth::id())
+            ->where('created_by', Auth::id())
             ->firstOrFail();
 
         // Validate answer correctness based on question type
@@ -111,7 +111,7 @@ class QuestionController extends Controller
             ->firstOrFail();
         
         $course = Course::where('id', $courseId)
-            ->where('instructor_id', Auth::id())
+            ->where('created_by', Auth::id())
             ->firstOrFail();
 
         $question = Question::where('quiz_id', $quizId)
@@ -184,7 +184,7 @@ class QuestionController extends Controller
             ->firstOrFail();
         
         $course = Course::where('id', $courseId)
-            ->where('instructor_id', Auth::id())
+            ->where('created_by', Auth::id())
             ->firstOrFail();
 
         $question = Question::where('quiz_id', $quizId)
