@@ -1,6 +1,16 @@
 # Quiz Learning Platform - Project Status
 
-## ✅ BACKEND COMPLETED - 100% Ready!
+## 📍 Current Phase: Week 6 - Testing & Bug Fixes ⏳
+
+**Last Updated**: January 23, 2026
+
+## 🔧 Critical Fixes Applied (Week 6)
+- ✅ **API Authentication Error Handling (2026-01-23)**: Fixed 500 error on unauthenticated API requests
+  - Problem: Laravel was trying to redirect to non-existent 'login' route when API authentication failed
+  - Solution: Updated `backend/bootstrap/app.php` to return JSON 401 responses for API requests
+  - Result: All API endpoints now properly handle authentication failures with `{"success":false,"message":"Unauthenticated."}`
+
+## ✅ BACKEND & FRONTEND COMPLETED - 100%!
 
 ### Backend (Laravel 12)
 - ✅ Laravel 12 installed successfully
