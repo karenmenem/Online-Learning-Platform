@@ -1,9 +1,10 @@
+import { getUser, logout } from '../utils/storage';
+
 function Dashboard() {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const user = getUser();
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
+    logout();
     window.location.href = '/';
   };
 

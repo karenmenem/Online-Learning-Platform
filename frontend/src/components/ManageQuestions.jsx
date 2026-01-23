@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getAuthToken } from '../utils/storage';
 import './ManageQuestions.css';
 
 function ManageQuestions() {
@@ -27,7 +28,7 @@ function ManageQuestions() {
 
   const loadQuiz = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(
         `http://localhost:8000/api/courses/${courseId}/quizzes/${quizId}`,
         {
@@ -47,7 +48,7 @@ function ManageQuestions() {
   const loadQuestions = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(
         `http://localhost:8000/api/instructor/courses/${courseId}/quizzes/${quizId}/questions`,
         {
@@ -68,7 +69,7 @@ function ManageQuestions() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
 
     // Validate answers based on question type
     if (formData.question_type === 'true_false' && formData.answers.length !== 2) {
@@ -136,7 +137,7 @@ function ManageQuestions() {
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(
         `http://localhost:8000/api/instructor/courses/${courseId}/quizzes/${quizId}/questions/${questionId}`,
         {

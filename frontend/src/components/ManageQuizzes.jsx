@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getAuthToken } from '../utils/storage';
 import './ManageQuizzes.css';
 
 function ManageQuizzes() {
@@ -27,7 +28,7 @@ function ManageQuizzes() {
 
   const loadCourse = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/courses/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -44,7 +45,7 @@ function ManageQuizzes() {
   const loadQuizzes = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/courses/${courseId}/quizzes`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -63,7 +64,7 @@ function ManageQuizzes() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const token = localStorage.getItem('auth_token');
+    const token = getAuthToken();
     
     try {
       const url = editingQuiz
@@ -121,7 +122,7 @@ function ManageQuizzes() {
     if (!confirm('Are you sure you want to delete this quiz?')) return;
     
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(
         `http://localhost:8000/api/instructor/courses/${courseId}/quizzes/${quizId}`,
         {

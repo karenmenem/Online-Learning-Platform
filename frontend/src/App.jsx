@@ -1,21 +1,27 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
+import StudentLogin from './components/StudentLogin';
+import InstructorLogin from './components/InstructorLogin';
+import AdminLogin from './components/AdminLogin';
 import Register from './components/Register';
 import StudentDashboard from './components/StudentDashboard';
 import InstructorDashboard from './components/InstructorDashboard';
+import AdminDashboard from './components/AdminDashboard';
 import ManageLessons from './components/ManageLessons';
 import ManageQuizzes from './components/ManageQuizzes';
 import ManageQuestions from './components/ManageQuestions';
 import CourseLearning from './components/CourseLearning';
 import TakeQuiz from './components/TakeQuiz';
+import Certificate from './components/Certificate';
+import { getAuthToken, getUser } from './utils/storage';
 
 function App() {
   const isAuthenticated = () => {
-    return localStorage.getItem('auth_token') !== null;
+    return getAuthToken() !== null;
   };
 
   const getUserRole = () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user = getUser();
     return user.role;
   };
 
@@ -26,9 +32,17 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={
-          isAuthenticated() ? <Navigate to="/dashboard" /> : <Login />
-        } />
+        {/* Default route redirects to student login */}
+        <Route path="/" element={<Navigate to="/student/login" />} />
+        
+        {/* Separate login pages for each role */}
+        <Route path="/student/login" element={<StudentLogin />} />
+        <Route path="/instructor/login" element={<InstructorLogin />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        
+        {/* General login (legacy) */}
+        <Route path="/login" element={<Login />} />
+        
         <Route path="/register" element={
           isAuthenticated() ? <Navigate to="/dashboard" /> : <Register />
         } />
@@ -41,10 +55,7 @@ function App() {
               ) : getUserRole() === 'instructor' ? (
                 <Navigate to="/instructor/dashboard" replace />
               ) : (
-                <div style={{padding: '40px', textAlign: 'center'}}>
-                  <h1>Admin Dashboard</h1>
-                  <p>Coming soon...</p>
-                </div>
+                <Navigate to="/admin/dashboard" replace />
               )}
             </ProtectedRoute>
           } 
@@ -62,6 +73,14 @@ function App() {
           element={
             <ProtectedRoute>
               <InstructorDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           } 
         />
@@ -102,6 +121,14 @@ function App() {
           element={
             <ProtectedRoute>
               <TakeQuiz />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/certificates/:certificateId" 
+          element={
+            <ProtectedRoute>
+              <Certificate />
             </ProtectedRoute>
           } 
         />

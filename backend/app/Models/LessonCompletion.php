@@ -13,6 +13,7 @@ class LessonCompletion extends Model
         'lesson_id',
         'user_id',
         'completed_at',
+        'time_spent',
     ];
 
     protected $casts = [

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getUser, getAuthToken, logout } from '../utils/storage';
 import './InstructorDashboard.css';
 
 function InstructorDashboard() {
@@ -27,7 +28,7 @@ function InstructorDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    const userData = getUser();
     setUser(userData);
     loadMyCourses();
   }, []);
@@ -35,7 +36,7 @@ function InstructorDashboard() {
   const loadMyCourses = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch('http://localhost:8000/api/instructor/courses', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -58,7 +59,7 @@ function InstructorDashboard() {
     setError('');
     
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const url = editingCourse 
         ? `http://localhost:8000/api/instructor/courses/${editingCourse.id}`
         : 'http://localhost:8000/api/instructor/courses';
@@ -104,7 +105,7 @@ function InstructorDashboard() {
     if (!confirm('Are you sure you want to delete this course?')) return;
     
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/instructor/courses/${courseId}`, {
         method: 'DELETE',
         headers: {
@@ -127,7 +128,7 @@ function InstructorDashboard() {
 
   const togglePublish = async (courseId, currentStatus) => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/instructor/courses/${courseId}`, {
         method: 'PUT',
         headers: {
@@ -162,9 +163,8 @@ function InstructorDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    window.location.href = '/';
+    logout();
+    window.location.href = '/instructor/login';
   };
 
   const handleInputChange = (e) => {

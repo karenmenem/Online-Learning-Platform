@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../api/auth';
+import { setAuthToken, setUser } from '../utils/storage';
 import './Register.css';
 
 function Register() {
@@ -26,8 +27,8 @@ function Register() {
     
     try {
       const data = await register(name, email, password, passwordConfirmation, role);
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      setAuthToken(data.token);
+      setUser(data.user);
       
       // Navigate to role-specific dashboard
       if (data.user.role === 'student') {

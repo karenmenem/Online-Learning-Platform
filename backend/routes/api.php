@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CertificateController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\LessonController;
+use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\QuestionController;
 use Illuminate\Http\Request;
@@ -17,6 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::get('/student/stats', [AuthController::class, 'getStudentStats']);
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
@@ -63,4 +67,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/instructor/courses/{courseId}/quizzes/{quizId}/questions', [QuestionController::class, 'store']);
     Route::put('/instructor/courses/{courseId}/quizzes/{quizId}/questions/{questionId}', [QuestionController::class, 'update']);
     Route::delete('/instructor/courses/{courseId}/quizzes/{quizId}/questions/{questionId}', [QuestionController::class, 'destroy']);
+
+    // Certificate routes
+    Route::get('/courses/{courseId}/certificate/check', [CertificateController::class, 'checkAndGenerate']);
+    Route::get('/certificates', [CertificateController::class, 'index']);
+    Route::get('/certificates/{id}', [CertificateController::class, 'show']);
+    Route::get('/certificates/{id}/download', [CertificateController::class, 'download']);
+
+    // Progress Analytics routes
+    Route::get('/progress/analytics', [ProgressController::class, 'getOverallAnalytics']);
+    Route::get('/progress/courses/{courseId}/analytics', [ProgressController::class, 'getCourseAnalytics']);
+
+    // Admin routes
+    Route::get('/admin/stats', [AdminController::class, 'getStats']);
+    Route::get('/admin/users', [AdminController::class, 'getUsers']);
+    Route::get('/admin/courses', [AdminController::class, 'getCourses']);
+    Route::put('/admin/users/{userId}/role', [AdminController::class, 'updateUserRole']);
+    Route::delete('/admin/users/{userId}', [AdminController::class, 'deleteUser']);
+    Route::delete('/admin/courses/{courseId}', [AdminController::class, 'deleteCourse']);
 });
+
+// Public certificate verification route (no auth required)
+Route::get('/certificates/verify/{code}', [CertificateController::class, 'verify']);

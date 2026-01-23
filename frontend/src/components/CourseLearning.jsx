@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getAuthToken } from '../utils/storage';
+import { checkCertificateEligibility, downloadCertificate } from '../api/certificates';
 import './CourseLearning.css';
 
 function CourseLearning() {
@@ -11,11 +13,14 @@ function CourseLearning() {
   const [currentLesson, setCurrentLesson] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [certificate, setCertificate] = useState(null);
+  const [certificateEligible, setCertificateEligible] = useState(false);
 
   useEffect(() => {
     loadCourse();
     loadLessons();
     loadQuizzes();
+    checkCertificate();
   }, [courseId]);
 
   useEffect(() => {
@@ -28,7 +33,7 @@ function CourseLearning() {
 
   const loadCourse = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/courses/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -45,7 +50,7 @@ function CourseLearning() {
   const loadLessons = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/courses/${courseId}/lessons`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -63,7 +68,7 @@ function CourseLearning() {
 
   const loadQuizzes = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/courses/${courseId}/quizzes`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -77,9 +82,31 @@ function CourseLearning() {
     }
   };
 
+  const checkCertificate = async () => {
+    try {
+      const data = await checkCertificateEligibility(courseId);
+      if (data.success) {
+        setCertificateEligible(true);
+        setCertificate(data.certificate);
+      }
+    } catch (err) {
+      console.log('Certificate not yet available');
+    }
+  };
+
+  const handleDownloadCertificate = async () => {
+    if (certificate) {
+      try {
+        await downloadCertificate(certificate.id);
+      } catch (err) {
+        alert('Failed to download certificate');
+      }
+    }
+  };
+
   const markComplete = async (lessonId) => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(
         `http://localhost:8000/api/courses/${courseId}/lessons/${lessonId}/complete`,
         {
@@ -93,6 +120,7 @@ function CourseLearning() {
 
       if (response.ok) {
         loadLessons();
+        checkCertificate();
       }
     } catch (err) {
       console.error('Failed to mark complete:', err);
@@ -101,7 +129,7 @@ function CourseLearning() {
 
   const markIncomplete = async (lessonId) => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(
         `http://localhost:8000/api/courses/${courseId}/lessons/${lessonId}/complete`,
         {
@@ -184,6 +212,11 @@ function CourseLearning() {
             <span>{Math.round(progressPercentage)}%</span>
           </div>
         </div>
+        {certificateEligible && certificate && (
+          <button onClick={handleDownloadCertificate} className="certificate-btn">
+            🎓 Download Certificate
+          </button>
+        )}
       </div>
 
       {error && <div className="error-message">{error}</div>}

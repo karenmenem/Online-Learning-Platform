@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getAuthToken } from '../utils/storage';
 import './TakeQuiz.css';
 
 function TakeQuiz() {
@@ -45,7 +46,7 @@ function TakeQuiz() {
   const loadQuiz = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/courses/${courseId}/quizzes/${quizId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -107,7 +108,7 @@ function TakeQuiz() {
     setError('');
 
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       
       // Format answers for API
       const formattedAnswers = quiz.questions.map(question => ({
@@ -152,7 +153,7 @@ function TakeQuiz() {
 
   const viewAttempt = async (attemptId) => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(
         `http://localhost:8000/api/courses/${courseId}/quizzes/${quizId}/attempts/${attemptId}`,
         {

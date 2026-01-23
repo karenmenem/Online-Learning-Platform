@@ -12,12 +12,37 @@ use Illuminate\Support\Facades\Auth;
 class CourseController extends Controller
 {
     // Get all published courses
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::with('instructor:id,name')
-            ->where('is_published', true)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Course::with('instructor:id,name')
+            ->where('is_published', true);
+
+        // Search by title or description
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('short_description', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->has('category') && $request->category) {
+            $query->where('category', $request->category);
+        }
+
+        // Filter by difficulty
+        if ($request->has('difficulty') && $request->difficulty) {
+            $query->where('difficulty', strtolower($request->difficulty));
+        }
+
+        // Filter by instructor
+        if ($request->has('instructor') && $request->instructor) {
+            $query->where('created_by', $request->instructor);
+        }
+
+        $courses = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json([
             'success' => true,

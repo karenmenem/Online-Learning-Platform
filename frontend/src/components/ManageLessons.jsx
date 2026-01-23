@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getAuthToken } from '../utils/storage';
 import './ManageLessons.css';
 
 function ManageLessons() {
@@ -28,7 +29,7 @@ function ManageLessons() {
 
   const loadCourse = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/courses/${courseId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -45,7 +46,7 @@ function ManageLessons() {
   const loadLessons = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(`http://localhost:8000/api/courses/${courseId}/lessons`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -67,7 +68,7 @@ function ManageLessons() {
     setError('');
 
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const url = editingLesson
         ? `http://localhost:8000/api/instructor/courses/${courseId}/lessons/${editingLesson.id}`
         : `http://localhost:8000/api/instructor/courses/${courseId}/lessons`;
@@ -104,7 +105,7 @@ function ManageLessons() {
     if (!confirm('Are you sure you want to delete this lesson?')) return;
 
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getAuthToken();
       const response = await fetch(
         `http://localhost:8000/api/instructor/courses/${courseId}/lessons/${lessonId}`,
         {
