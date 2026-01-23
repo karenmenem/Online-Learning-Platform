@@ -82,9 +82,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/stats', [AdminController::class, 'getStats']);
     Route::get('/admin/users', [AdminController::class, 'getUsers']);
     Route::get('/admin/courses', [AdminController::class, 'getCourses']);
+    Route::get('/admin/courses/pending', [AdminController::class, 'getPendingCourses']);
     Route::put('/admin/users/{userId}/role', [AdminController::class, 'updateUserRole']);
     Route::delete('/admin/users/{userId}', [AdminController::class, 'deleteUser']);
     Route::delete('/admin/courses/{courseId}', [AdminController::class, 'deleteCourse']);
+    Route::put('/admin/courses/{courseId}/approve', [AdminController::class, 'approveCourse']);
+    Route::put('/admin/courses/{courseId}/reject', [AdminController::class, 'rejectCourse']);
 });
 
 // Public certificate verification route (no auth required)

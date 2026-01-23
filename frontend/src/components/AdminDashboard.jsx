@@ -99,6 +99,49 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleApproveCourse = async (courseId) => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`http://localhost:8000/api/admin/courses/${courseId}/approve`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      if (response.ok) {
+        alert('Course approved successfully!');
+        loadAdminData();
+      }
+    } catch (error) {
+      console.error('Error approving course:', error);
+      alert('Failed to approve course');
+    }
+  };
+
+  const handleRejectCourse = async (courseId) => {
+    const reason = prompt('Enter rejection reason:');
+    if (!reason) return;
+    
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`http://localhost:8000/api/admin/courses/${courseId}/reject`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ rejection_reason: reason })
+      });
+      
+      if (response.ok) {
+        alert('Course rejected');
+        loadAdminData();
+      }
+    } catch (error) {
+      console.error('Error rejecting course:', error);
+      alert('Failed to reject course');
+    }
+  };
+
   const handleLogout = () => {
     logout();
     ;
@@ -137,6 +180,15 @@ const AdminDashboard = () => {
         >
           Courses
         </button>
+        <button 
+          className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
+          onClick={() => setActiveTab('pending')}
+        >
+          Pending Approval
+          {courses.filter(c => c.approval_status === 'pending').length > 0 && (
+            <span className="badge">{courses.filter(c => c.approval_status === 'pending').length}</span>
+          )}
+        </button>
       </div>
 
       <div className="admin-content">
@@ -165,6 +217,13 @@ const AdminDashboard = () => {
                 </div>
               </div>
               <div className="stat-card">
+                <div className="stat-icon">⏳</div>
+                <div className="stat-info">
+                  <h3>{stats.pendingApproval || 0}</h3>
+                  <p>Pending Approval</p>
+                </div>
+              </div>
+              <div className="stat-card">
                 <div className="stat-icon">📝</div>
                 <div className="stat-info">
                   <h3>{stats.totalQuizAttempts}</h3>
@@ -186,7 +245,9 @@ const AdminDashboard = () => {
                   <h4>Course Stats</h4>
                   <p>Published: {courses.filter(c => c.is_published).length}</p>
                   <p>Drafts: {courses.filter(c => !c.is_published).length}</p>
-                  <p>Avg Enrollments: {courses.length > 0 ? Math.round(stats.totalEnrollments / courses.length) : 0}</p>
+                  <p>Pending: {courses.filter(c => c.approval_status === 'pending').length}</p>
+                  <p>Approved: {courses.filter(c => c.approval_status === 'approved').length}</p>
+                  <p>Rejected: {courses.filter(c => c.approval_status === 'rejected').length}</p>
                 </div>
               </div>
             </div>
@@ -268,6 +329,9 @@ const AdminDashboard = () => {
                         <span className={`status-badge ${course.is_published ? 'published' : 'draft'}`}>
                           {course.is_published ? 'Published' : 'Draft'}
                         </span>
+                        <span className={`status-badge ${course.approval_status}`}>
+                          {course.approval_status}
+                        </span>
                       </td>
                       <td>{course.enrollments_count || 0}</td>
                       <td>{new Date(course.created_at).toLocaleDateString()}</td>
@@ -283,6 +347,42 @@ const AdminDashboard = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'pending' && (
+          <div className="pending-tab">
+            <h2>Courses Pending Approval</h2>
+            <div className="courses-grid">
+              {courses.filter(c => c.approval_status === 'pending').length === 0 ? (
+                <p className="empty-state">No courses pending approval</p>
+              ) : (
+                courses.filter(c => c.approval_status === 'pending').map(course => (
+                  <div key={course.id} className="pending-course-card">
+                    <h3>{course.title}</h3>
+                    <p className="course-description">{course.description}</p>
+                    <div className="course-meta">
+                      <span>👨‍🏫 {course.instructor_name}</span>
+                      <span>📅 {new Date(course.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="approval-actions">
+                      <button 
+                        onClick={() => handleApproveCourse(course.id)}
+                        className="approve-btn"
+                      >
+                        ✓ Approve
+                      </button>
+                      <button 
+                        onClick={() => handleRejectCourse(course.id)}
+                        className="reject-btn"
+                      >
+                        ✗ Reject
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}

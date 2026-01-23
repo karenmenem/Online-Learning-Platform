@@ -15,7 +15,8 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $query = Course::with('instructor:id,name')
-            ->where('is_published', true);
+            ->where('is_published', true)
+            ->where('approval_status', 'approved'); // Only show approved courses
 
         // Search by title or description
         if ($request->has('search') && $request->search) {
@@ -231,11 +232,12 @@ class CourseController extends Controller
             'thumbnail' => $request->thumbnail,
             'created_by' => $user->id,
             'is_published' => $request->is_published ?? false,
+            'approval_status' => 'pending', // Set to pending by default
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Course created successfully',
+            'message' => 'Course created successfully and is pending approval',
             'course' => $course,
         ], 201);
     }

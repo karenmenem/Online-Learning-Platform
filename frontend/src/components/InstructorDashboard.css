@@ -342,6 +342,23 @@
   min-height: 40px;
 }
 
+.rejection-notice {
+  background-color: #fee2e2;
+  border: 2px solid #ef4444;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #991b1b;
+  line-height: 1.5;
+}
+
+.rejection-notice strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #7f1d1d;
+}
+
 /* Removed old course-stats - now using tooltip */
 
 .course-actions {

@@ -19,11 +19,16 @@ class Course extends Model
         'thumbnail',
         'created_by',
         'is_published',
+        'approval_status',
+        'rejection_reason',
+        'approved_at',
+        'approved_by',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
         'estimated_duration' => 'integer',
+        'approved_at' => 'datetime',
     ];
 
     // Relationships
@@ -57,5 +62,26 @@ class Course extends Model
     public function certificates()
     {
         return $this->hasMany(Certificate::class);
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    // Scopes
+    public function scopeApproved($query)
+    {
+        return $query->where('approval_status', 'approved');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('approval_status', 'pending');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('approval_status', 'rejected');
     }
 }

@@ -28,6 +28,9 @@ class AdminController extends Controller
             'totalCourses' => Course::count(),
             'publishedCourses' => Course::where('is_published', true)->count(),
             'draftCourses' => Course::where('is_published', false)->count(),
+            'pendingApproval' => Course::where('approval_status', 'pending')->count(),
+            'approvedCourses' => Course::where('approval_status', 'approved')->count(),
+            'rejectedCourses' => Course::where('approval_status', 'rejected')->count(),
             'totalEnrollments' => CourseEnrollment::count(),
             'averageEnrollments' => Course::count() > 0 
                 ? round(CourseEnrollment::count() / Course::count(), 1)
@@ -68,6 +71,9 @@ class AdminController extends Controller
                     'title' => $course->title,
                     'description' => $course->description,
                     'is_published' => $course->is_published,
+                    'approval_status' => $course->approval_status,
+                    'rejection_reason' => $course->rejection_reason,
+                    'approved_at' => $course->approved_at,
                     'instructor_name' => $course->instructor->name,
                     'enrollments_count' => $course->enrollments_count,
                     'created_at' => $course->created_at,
@@ -135,5 +141,85 @@ class AdminController extends Controller
         $course->delete();
 
         return response()->json(['message' => 'Course deleted successfully']);
+    }
+
+    // Approve course
+    public function approveCourse($courseId)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $course = Course::findOrFail($courseId);
+
+        if ($course->approval_status === 'approved') {
+            return response()->json(['message' => 'Course is already approved'], 400);
+        }
+
+        $course->update([
+            'approval_status' => 'approved',
+            'approved_at' => now(),
+            'approved_by' => Auth::id(),
+            'rejection_reason' => null, // Clear any previous rejection reason
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course approved successfully',
+            'course' => $course->fresh()->load('instructor'),
+        ]);
+    }
+
+    // Reject course
+    public function rejectCourse(Request $request, $courseId)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'rejection_reason' => 'required|string|max:1000',
+        ]);
+
+        $course = Course::findOrFail($courseId);
+
+        if ($course->approval_status === 'rejected') {
+            return response()->json(['message' => 'Course is already rejected'], 400);
+        }
+
+        $course->update([
+            'approval_status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+            'approved_at' => null,
+            'approved_by' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Course rejected',
+            'course' => $course->fresh()->load('instructor'),
+        ]);
+    }
+
+    // Get pending courses for approval
+    public function getPendingCourses()
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $courses = Course::with('instructor')
+            ->where('approval_status', 'pending')
+            ->withCount('enrollments')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'courses' => $courses,
+        ]);
     }
 }

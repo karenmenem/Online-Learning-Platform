@@ -252,6 +252,11 @@ function InstructorDashboard() {
                         ) : (
                           <span className="status-badge draft">Draft</span>
                         )}
+                        <span className={`status-badge ${course.approval_status}`}>
+                          {course.approval_status === 'pending' && '⏳ Pending'}
+                          {course.approval_status === 'approved' && '✓ Approved'}
+                          {course.approval_status === 'rejected' && '✗ Rejected'}
+                        </span>
                       </div>
                     </div>
                     <div className="course-info">
@@ -289,6 +294,12 @@ function InstructorDashboard() {
                         </div>
                       </div>
                       <p className="course-description">{course.short_description}</p>
+                      
+                      {course.rejection_reason && (
+                        <div className="rejection-notice">
+                          <strong>❌ Rejection Reason:</strong> {course.rejection_reason}
+                        </div>
+                      )}
 
                       <div className="course-actions">
                         <button 
