@@ -257,7 +257,13 @@ function StudentDashboard() {
                   <div key={course.id} className="course-card">
                     <div className="course-thumbnail">
                       {course.thumbnail ? (
-                        <img src={course.thumbnail} alt={course.title} />
+                        <img 
+                          src={course.thumbnail.startsWith('http') 
+                            ? course.thumbnail 
+                            : `http://localhost:8000${course.thumbnail}`
+                          } 
+                          alt={course.title} 
+                        />
                       ) : (
                         <div className="placeholder-thumbnail">📚</div>
                       )}
@@ -305,7 +311,13 @@ function StudentDashboard() {
                   <div key={course.id} className="course-card enrolled">
                     <div className="course-thumbnail">
                       {course.thumbnail ? (
-                        <img src={course.thumbnail} alt={course.title} />
+                        <img 
+                          src={course.thumbnail.startsWith('http') 
+                            ? course.thumbnail 
+                            : `http://localhost:8000${course.thumbnail}`
+                          } 
+                          alt={course.title} 
+                        />
                       ) : (
                         <div className="placeholder-thumbnail">📚</div>
                       )}

@@ -219,9 +219,21 @@ class CourseController extends Controller
             'description' => 'required|string',
             'category' => 'required|string|max:100',
             'difficulty' => 'required|in:beginner,intermediate,advanced',
-            'thumbnail' => 'nullable|url',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'thumbnail_url' => 'nullable|url',
             'is_published' => 'boolean',
         ]);
+
+        $thumbnailPath = null;
+        
+        // Handle file upload
+        if ($request->hasFile('thumbnail')) {
+            $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+            $thumbnailPath = '/storage/' . $thumbnailPath;
+        } elseif ($request->thumbnail_url) {
+            // Use URL if provided
+            $thumbnailPath = $request->thumbnail_url;
+        }
 
         $course = Course::create([
             'title' => $request->title,
@@ -229,7 +241,7 @@ class CourseController extends Controller
             'description' => $request->description,
             'category' => $request->category,
             'difficulty' => $request->difficulty,
-            'thumbnail' => $request->thumbnail,
+            'thumbnail' => $thumbnailPath,
             'created_by' => $user->id,
             'is_published' => $request->is_published ?? false,
             'approval_status' => 'pending', // Set to pending by default
@@ -261,11 +273,28 @@ class CourseController extends Controller
             'description' => 'sometimes|string',
             'category' => 'sometimes|string|max:100',
             'difficulty' => 'sometimes|in:beginner,intermediate,advanced',
-            'thumbnail' => 'nullable|url',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'thumbnail_url' => 'nullable|url',
             'is_published' => 'boolean',
         ]);
 
-        $course->update($request->all());
+        $updateData = $request->except(['thumbnail', 'thumbnail_url']);
+        
+        // Handle file upload
+        if ($request->hasFile('thumbnail')) {
+            // Delete old thumbnail if exists
+            if ($course->thumbnail && strpos($course->thumbnail, '/storage/') === 0) {
+                \Storage::disk('public')->delete(str_replace('/storage/', '', $course->thumbnail));
+            }
+            
+            $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+            $updateData['thumbnail'] = '/storage/' . $thumbnailPath;
+        } elseif ($request->has('thumbnail_url')) {
+            // Use URL if provided
+            $updateData['thumbnail'] = $request->thumbnail_url;
+        }
+
+        $course->update($updateData);
 
         return response()->json([
             'success' => true,

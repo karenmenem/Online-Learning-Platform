@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Add CORS first to handle preflight requests
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+        
         $middleware->api(prepend: [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
@@ -22,10 +25,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json([
+                $response = response()->json([
                     'success' => false,
                     'message' => 'Unauthenticated.'
                 ], 401);
+                
+                // Add CORS headers to error responses
+                $origin = $request->header('Origin', 'http://localhost:5173');
+                $response->headers->set('Access-Control-Allow-Origin', $origin);
+                $response->headers->set('Access-Control-Allow-Credentials', 'true');
+                
+                return $response;
             }
         });
     })->create();

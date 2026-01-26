@@ -24,6 +24,8 @@ function InstructorDashboard() {
     thumbnail: '',
     is_published: false,
   });
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
 
   const navigate = useNavigate();
 
@@ -64,13 +66,34 @@ function InstructorDashboard() {
         ? `http://localhost:8000/api/instructor/courses/${editingCourse.id}`
         : 'http://localhost:8000/api/instructor/courses';
       
+      // Create FormData for file upload
+      const submitData = new FormData();
+      submitData.append('title', formData.title);
+      submitData.append('short_description', formData.short_description);
+      submitData.append('description', formData.description);
+      submitData.append('category', formData.category);
+      submitData.append('difficulty', formData.difficulty);
+      submitData.append('is_published', formData.is_published ? '1' : '0');
+      
+      // Laravel: Use POST with _method for PUT requests with FormData
+      if (editingCourse) {
+        submitData.append('_method', 'PUT');
+      }
+      
+      // Add file or URL
+      if (thumbnailFile) {
+        submitData.append('thumbnail', thumbnailFile);
+      } else if (formData.thumbnail) {
+        submitData.append('thumbnail_url', formData.thumbnail);
+      }
+      
       const response = await fetch(url, {
-        method: editingCourse ? 'PUT' : 'POST',
+        method: 'POST', // Always use POST for FormData
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: submitData,
       });
       
       const data = await response.json();
@@ -88,10 +111,18 @@ function InstructorDashboard() {
           thumbnail: '',
           is_published: false,
         });
+        setThumbnailFile(null);
+        setThumbnailPreview(null);
         loadMyCourses();
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(data.message || `Failed to ${editingCourse ? 'update' : 'create'} course`);
+        // Show validation errors if available
+        if (data.errors) {
+          const errorMessages = Object.values(data.errors).flat().join(', ');
+          setError(errorMessages);
+        } else {
+          setError(data.message || `Failed to ${editingCourse ? 'update' : 'create'} course`);
+        }
       }
     } catch (err) {
       setError(`Failed to ${editingCourse ? 'update' : 'create'} course`);
@@ -175,6 +206,26 @@ function InstructorDashboard() {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setThumbnailFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnailPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      // Clear URL field
+      setFormData(prev => ({ ...prev, thumbnail: '' }));
+    }
+  };
+
+  const handleRemoveThumbnail = () => {
+    setThumbnailFile(null);
+    setThumbnailPreview(null);
+  };
+
   if (!user) {
     return <div className="loading">Loading...</div>;
   }
@@ -242,7 +293,13 @@ function InstructorDashboard() {
                   <div key={course.id} className="course-card instructor">
                     <div className="course-thumbnail">
                       {course.thumbnail ? (
-                        <img src={course.thumbnail} alt={course.title} />
+                        <img 
+                          src={course.thumbnail.startsWith('http') 
+                            ? course.thumbnail 
+                            : `http://localhost:8000${course.thumbnail}`
+                          } 
+                          alt={course.title} 
+                        />
                       ) : (
                         <div className="placeholder-thumbnail">📚</div>
                       )}
@@ -449,15 +506,53 @@ function InstructorDashboard() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="thumbnail">Thumbnail URL</label>
-                <input
-                  type="url"
-                  id="thumbnail"
-                  name="thumbnail"
-                  value={formData.thumbnail}
-                  onChange={handleInputChange}
-                  placeholder="https://example.com/image.jpg"
-                />
+                <label>Thumbnail Image</label>
+                
+                {/* File Upload Option */}
+                <div className="thumbnail-upload">
+                  <label htmlFor="thumbnail-file" className="file-upload-btn">
+                    📁 Choose Image from Computer
+                  </label>
+                  <input
+                    type="file"
+                    id="thumbnail-file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                  
+                  {thumbnailPreview && (
+                    <div className="thumbnail-preview">
+                      <img src={thumbnailPreview} alt="Preview" />
+                      <button type="button" onClick={handleRemoveThumbnail} className="remove-btn">
+                        ✕ Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* OR Separator */}
+                {!thumbnailFile && (
+                  <>
+                    <div className="or-separator">
+                      <span>OR</span>
+                    </div>
+
+                    {/* URL Option */}
+                    <div className="thumbnail-url">
+                      <label htmlFor="thumbnail">Enter Image URL</label>
+                      <input
+                        type="url"
+                        id="thumbnail"
+                        name="thumbnail"
+                        value={formData.thumbnail}
+                        onChange={handleInputChange}
+                        placeholder="https://example.com/image.jpg"
+                        disabled={!!thumbnailFile}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="form-group checkbox">
