@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
-    // Get all questions for a quiz
+    
     public function index($courseId, $quizId)
     {
         $questions = Question::where('quiz_id', $quizId)
@@ -24,7 +24,7 @@ class QuestionController extends Controller
         return response()->json(['questions' => $questions]);
     }
 
-    // Create question with answers
+    // create ques + answers
     public function store(Request $request, $courseId, $quizId)
     {
         $validated = $request->validate([
@@ -37,7 +37,7 @@ class QuestionController extends Controller
             'answers.*.is_correct' => 'required|boolean',
         ]);
 
-        // Verify quiz belongs to instructor's course
+        
         $quiz = Quiz::where('id', $quizId)
             ->where('course_id', $courseId)
             ->firstOrFail();
@@ -46,7 +46,7 @@ class QuestionController extends Controller
             ->where('created_by', Auth::id())
             ->firstOrFail();
 
-        // Validate answer correctness based on question type
+        // validate answers
         $correctCount = collect($validated['answers'])->where('is_correct', true)->count();
         
         if ($validated['question_type'] === 'true_false' && count($validated['answers']) !== 2) {
@@ -63,7 +63,7 @@ class QuestionController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create question
+            
             $question = Question::create([
                 'quiz_id' => $quizId,
                 'question_text' => $validated['question_text'],
@@ -72,7 +72,7 @@ class QuestionController extends Controller
                 'order' => $validated['order'] ?? Question::where('quiz_id', $quizId)->max('order') + 1,
             ]);
 
-            // Create answers
+            
             foreach ($validated['answers'] as $answerData) {
                 Answer::create([
                     'question_id' => $question->id,
@@ -175,10 +175,10 @@ class QuestionController extends Controller
         }
     }
 
-    // Delete question
+    // Delete 
     public function destroy($courseId, $quizId, $questionId)
     {
-        // Verify quiz belongs to instructor's course
+       
         $quiz = Quiz::where('id', $quizId)
             ->where('course_id', $courseId)
             ->firstOrFail();

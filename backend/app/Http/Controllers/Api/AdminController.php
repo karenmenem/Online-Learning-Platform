@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
-    // Get platform statistics
+    
     public function getStats()
     {
         // Check if user is admin
@@ -109,10 +109,10 @@ class AdminController extends Controller
         return response()->json(['message' => 'User role updated successfully', 'user' => $user]);
     }
 
-    // Delete user
+   
     public function deleteUser($userId)
     {
-        // Check if user is admin
+        
         if (Auth::user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -129,10 +129,10 @@ class AdminController extends Controller
         return response()->json(['message' => 'User deleted successfully']);
     }
 
-    // Delete course
+    
     public function deleteCourse($courseId)
     {
-        // Check if user is admin
+        
         if (Auth::user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -143,10 +143,10 @@ class AdminController extends Controller
         return response()->json(['message' => 'Course deleted successfully']);
     }
 
-    // Approve course
+   
     public function approveCourse($courseId)
     {
-        // Check if user is admin
+        
         if (Auth::user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -161,7 +161,7 @@ class AdminController extends Controller
             'approval_status' => 'approved',
             'approved_at' => now(),
             'approved_by' => Auth::id(),
-            'rejection_reason' => null, // Clear any previous rejection reason
+            'rejection_reason' => null, 
         ]);
 
         return response()->json([
@@ -171,10 +171,10 @@ class AdminController extends Controller
         ]);
     }
 
-    // Reject course
+    
     public function rejectCourse(Request $request, $courseId)
     {
-        // Check if user is admin
+        
         if (Auth::user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
@@ -203,10 +203,10 @@ class AdminController extends Controller
         ]);
     }
 
-    // Get pending courses for approval
+    // pending courses
     public function getPendingCourses()
     {
-        // Check if user is admin
+       
         if (Auth::user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }

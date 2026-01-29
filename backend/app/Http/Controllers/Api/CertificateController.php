@@ -12,13 +12,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class CertificateController extends Controller
 {
-    // Check and generate certificate if course is completed
+    
     public function checkAndGenerate($courseId)
     {
         $userId = Auth::id();
         $course = Course::findOrFail($courseId);
 
-        // Check if certificate already exists - if yes, return it (permanent)
+        
         $existingCert = Certificate::where('user_id', $userId)
             ->where('course_id', $courseId)
             ->first();
@@ -32,7 +32,7 @@ class CertificateController extends Controller
             ]);
         }
 
-        // Check if all lessons are completed
+        // check if lessons completed
         $totalLessons = $course->lessons()->count();
         
         if ($totalLessons === 0) {
@@ -57,7 +57,7 @@ class CertificateController extends Controller
             ]);
         }
 
-        // Check if all quizzes are passed
+        
         $quizzes = $course->quizzes;
         
         if ($quizzes->count() === 0) {
@@ -81,7 +81,7 @@ class CertificateController extends Controller
             }
         }
 
-        // Generate certificate
+       
         $certificate = Certificate::create([
             'user_id' => $userId,
             'course_id' => $courseId,
@@ -120,7 +120,7 @@ class CertificateController extends Controller
         return response()->json($certificate);
     }
 
-    // Download certificate as PDF
+    // download as pdf
     public function download($id)
     {
         $certificate = Certificate::with(['course.instructor', 'user'])
@@ -141,7 +141,7 @@ class CertificateController extends Controller
         return $pdf->download('certificate-' . $certificate->certificate_code . '.pdf');
     }
 
-    // Verify certificate by code (public route)
+    // Verify certificate by code 
     public function verify($code)
     {
         $certificate = Certificate::with(['course', 'user'])

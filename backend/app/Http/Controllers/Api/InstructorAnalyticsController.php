@@ -36,12 +36,12 @@ class InstructorAnalyticsController extends Controller
         return response()->json($stats);
     }
 
-    // Get course-wise analytics
+   
     public function getCourseAnalytics($courseId)
     {
         $instructorId = Auth::id();
         
-        // Verify course belongs to instructor
+        
         $course = Course::where('id', $courseId)
             ->where('created_by', $instructorId)
             ->firstOrFail();

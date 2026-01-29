@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LessonController extends Controller
 {
-    // Get all lessons for a course
+    
     public function index($courseId)
     {
         $course = Course::findOrFail($courseId);
@@ -52,13 +52,13 @@ class LessonController extends Controller
         ]);
     }
 
-    // Create lesson (instructor only)
+    // Create lesson 
     public function store(Request $request, $courseId)
     {
         $user = Auth::user();
         $course = Course::findOrFail($courseId);
 
-        // Check if user owns the course
+        
         if ($course->created_by !== $user->id) {
             return response()->json([
                 'success' => false,
@@ -90,14 +90,14 @@ class LessonController extends Controller
         ], 201);
     }
 
-    // Update lesson (instructor only)
+    // Update lesson 
     public function update(Request $request, $courseId, $lessonId)
     {
         $user = Auth::user();
         $course = Course::findOrFail($courseId);
         $lesson = Lesson::where('course_id', $courseId)->findOrFail($lessonId);
 
-        // Check if user owns the course
+        
         if ($course->created_by !== $user->id) {
             return response()->json([
                 'success' => false,
@@ -122,14 +122,14 @@ class LessonController extends Controller
         ]);
     }
 
-    // Delete lesson (instructor only)
+    // Delete 
     public function destroy($courseId, $lessonId)
     {
         $user = Auth::user();
         $course = Course::findOrFail($courseId);
         $lesson = Lesson::where('course_id', $courseId)->findOrFail($lessonId);
 
-        // Check if user owns the course
+       
         if ($course->created_by !== $user->id) {
             return response()->json([
                 'success' => false,
@@ -145,7 +145,7 @@ class LessonController extends Controller
         ]);
     }
 
-    // Mark lesson as completed (student only)
+    
     public function markComplete($courseId, $lessonId)
     {
         $user = Auth::user();
@@ -176,7 +176,7 @@ class LessonController extends Controller
             'user_id' => $user->id,
         ]);
 
-        // Update course progress
+        // Update 
         $this->updateCourseProgress($courseId, $user->id);
 
         return response()->json([
@@ -185,7 +185,7 @@ class LessonController extends Controller
         ]);
     }
 
-    // Mark lesson as incomplete (student only)
+    
     public function markIncomplete($courseId, $lessonId)
     {
         $user = Auth::user();
@@ -210,7 +210,7 @@ class LessonController extends Controller
         ]);
     }
 
-    // Helper method to update course progress
+   
     private function updateCourseProgress($courseId, $userId)
     {
         $course = Course::with('lessons')->findOrFail($courseId);

@@ -169,7 +169,7 @@ function CourseLearning() {
   const getYouTubeEmbedUrl = (url) => {
     if (!url) return null;
     
-    // Handle various YouTube URL formats
+    // hablde yt url
     let videoId = null;
     
     // Standard youtube.com watch URL

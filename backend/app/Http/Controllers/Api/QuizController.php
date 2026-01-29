@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class QuizController extends Controller
 {
-    // Get all quizzes for a course
+    // get al quizzes
     public function index($courseId)
     {
         $quizzes = Quiz::where('course_id', $courseId)
@@ -25,14 +25,14 @@ class QuizController extends Controller
         return response()->json(['quizzes' => $quizzes]);
     }
 
-    // Get single quiz with questions
+    
     public function show($courseId, $quizId)
     {
         $quiz = Quiz::with(['questions.answers'])
             ->where('course_id', $courseId)
             ->findOrFail($quizId);
 
-        // Check if user has attempts
+        // check if user aando attemps
         $attempts = QuizAttempt::where('quiz_id', $quizId)
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
@@ -44,7 +44,7 @@ class QuizController extends Controller
         ]);
     }
 
-    // Create quiz (Instructor only)
+    // Create quiz
     public function store(Request $request, $courseId)
     {
         $validated = $request->validate([
@@ -58,7 +58,7 @@ class QuizController extends Controller
             'allow_retake' => 'boolean',
         ]);
 
-        // Verify course belongs to instructor
+        
         $course = Course::where('id', $courseId)
             ->where('created_by', Auth::id())
             ->firstOrFail();
@@ -78,7 +78,7 @@ class QuizController extends Controller
         return response()->json(['quiz' => $quiz], 201);
     }
 
-    // Update quiz (Instructor only)
+    // updates
     public function update(Request $request, $courseId, $quizId)
     {
         $validated = $request->validate([
@@ -92,7 +92,7 @@ class QuizController extends Controller
             'allow_retake' => 'boolean',
         ]);
 
-        // Verify course belongs to instructor
+        
         $course = Course::where('id', $courseId)
             ->where('created_by', Auth::id())
             ->firstOrFail();
@@ -105,10 +105,10 @@ class QuizController extends Controller
         return response()->json(['quiz' => $quiz]);
     }
 
-    // Delete quiz (Instructor only)
+    // Delete 
     public function destroy($courseId, $quizId)
     {
-        // Verify course belongs to instructor
+        
         $course = Course::where('id', $courseId)
             ->where('created_by', Auth::id())
             ->firstOrFail();
@@ -121,7 +121,7 @@ class QuizController extends Controller
         return response()->json(['message' => 'Quiz deleted successfully']);
     }
 
-    // Submit quiz attempt (Student)
+    // Submit quiz attempt 
     public function submitAttempt(Request $request, $courseId, $quizId)
     {
         $validated = $request->validate([
@@ -135,7 +135,7 @@ class QuizController extends Controller
             ->where('course_id', $courseId)
             ->findOrFail($quizId);
 
-        // Calculate score
+        // calc score
         $totalQuestions = $quiz->questions->count();
         $correctAnswers = 0;
 
@@ -212,10 +212,10 @@ class QuizController extends Controller
         ]);
     }
 
-    // Get quiz statistics (Instructor)
+    // Get quiz statistics 
     public function getStatistics($courseId, $quizId)
     {
-        // Verify course belongs to instructor
+       
         $course = Course::where('id', $courseId)
             ->where('created_by', Auth::id())
             ->firstOrFail();

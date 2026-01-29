@@ -11,14 +11,14 @@ use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
-    // Get all published courses
+    // get published courses
     public function index(Request $request)
     {
         $query = Course::with('instructor:id,name')
             ->where('is_published', true)
-            ->where('approval_status', 'approved'); // Only show approved courses
+            ->where('approval_status', 'approved'); 
 
-        // Search by title or description
+        
         if ($request->has('search') && $request->search) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
@@ -33,12 +33,12 @@ class CourseController extends Controller
             $query->where('category', $request->category);
         }
 
-        // Filter by difficulty
+        
         if ($request->has('difficulty') && $request->difficulty) {
             $query->where('difficulty', strtolower($request->difficulty));
         }
 
-        // Filter by instructor
+        
         if ($request->has('instructor') && $request->instructor) {
             $query->where('created_by', $request->instructor);
         }
@@ -51,13 +51,13 @@ class CourseController extends Controller
         ]);
     }
 
-    // Get single course details
+    // get course details
     public function show($id)
     {
         $course = Course::with(['instructor:id,name', 'lessons', 'quizzes'])
             ->findOrFail($id);
 
-        // Check if user is enrolled
+        
         $isEnrolled = false;
         if (Auth::check()) {
             $isEnrolled = CourseEnrollment::where('user_id', Auth::id())
@@ -72,13 +72,13 @@ class CourseController extends Controller
         ]);
     }
 
-    // Enroll in a course
+    // enroll 
     public function enroll($id)
     {
         $user = Auth::user();
         $course = Course::findOrFail($id);
 
-        // Check if already enrolled
+        // check if alr enrolled
         $existingEnrollment = CourseEnrollment::where('user_id', $user->id)
             ->where('course_id', $id)
             ->first();
@@ -90,7 +90,7 @@ class CourseController extends Controller
             ], 400);
         }
 
-        // Check if user is a student
+       
         if ($user->role !== 'student') {
             return response()->json([
                 'success' => false,
@@ -98,7 +98,7 @@ class CourseController extends Controller
             ], 403);
         }
 
-        // Create enrollment
+        
         $enrollment = CourseEnrollment::create([
             'user_id' => $user->id,
             'course_id' => $id,
@@ -112,7 +112,7 @@ class CourseController extends Controller
         ]);
     }
 
-    // Get user's enrolled courses
+    // get enrolled courses
     public function myEnrolledCourses()
     {
         $user = Auth::user();
@@ -201,7 +201,7 @@ class CourseController extends Controller
         ]);
     }
 
-    // Create course (for instructors)
+    // create course
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -226,12 +226,12 @@ class CourseController extends Controller
 
         $thumbnailPath = null;
         
-        // Handle file upload
+        
         if ($request->hasFile('thumbnail')) {
             $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
             $thumbnailPath = '/storage/' . $thumbnailPath;
         } elseif ($request->thumbnail_url) {
-            // Use URL if provided
+            
             $thumbnailPath = $request->thumbnail_url;
         }
 
@@ -244,7 +244,7 @@ class CourseController extends Controller
             'thumbnail' => $thumbnailPath,
             'created_by' => $user->id,
             'is_published' => $request->is_published ?? false,
-            'approval_status' => 'pending', // Set to pending by default
+            'approval_status' => 'pending', 
         ]);
 
         return response()->json([
@@ -254,7 +254,7 @@ class CourseController extends Controller
         ], 201);
     }
 
-    // Update course (for instructors)
+    // update course
     public function update(Request $request, $id)
     {
         $user = Auth::user();
